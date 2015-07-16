@@ -3,6 +3,7 @@
 require 'osax'
 include OSAX
 
+app = ENV["HOME"] + "/popnlock/"
 data = ENV["HOME"] + "/popnlock-data/"
 output = ENV["HOME"] + "/Dropbox/Catshrine_Videos/"
 project = "XXX"
@@ -25,3 +26,16 @@ frames = osax.display_dialog("How many frames?", :default_answer => "8")[:text_r
 start = images[-frames][14,4]
 
 `ffmpeg -loop 1 -t #{(1/framerate.to_f) * frames * loops} -framerate #{framerate} -start_number #{start} -i "#{path}#{project}_003_01_X1_%04d.tiff" #{output + Time.now.strftime("%Y%m%d%H%M%S")}.mp4`
+
+videos = Dir.entries(output)
+videos.delete_at(2)
+videos = videos.select { |f| File.file?(output + f)}
+videos = videos.sort_by { |f| File.mtime(output + f) }
+videos = videos.last(8)
+videos = videos.reverse
+
+File.open(app + "playlist", "w") do |f|
+  videos.each { |element| f.puts(output + element) }
+end
+
+`echo 'loadlist playlist 0' >> ~/popnlock/whip`
