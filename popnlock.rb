@@ -22,10 +22,10 @@ images = images.select { |f| File.file?(path + f)}
 images = images.sort_by { |f| File.mtime(path + f) }
 
 frames = osax.display_dialog("How many frames?", :default_answer => "8")[:text_returned].to_i
-  
+
 start = images[-frames][14,4]
 
-`ffmpeg -loop 1 -t #{(1/framerate.to_f) * frames * loops} -framerate #{framerate} -start_number #{start} -i "#{path}#{project}_003_01_X1_%04d.tiff" #{output + Time.now.strftime("%Y%m%d%H%M%S")}.mp4`
+`ffmpeg -loop 1 -t #{(1/framerate.to_f) * frames * loops} -framerate #{framerate} -start_number #{start} -i "#{path}#{project}_#{scene}_01_X1_%04d.tiff" #{output + Time.now.strftime("%Y%m%d%H%M%S")}.mp4`
 
 videos = Dir.entries(output)
 videos.delete_at(2)
