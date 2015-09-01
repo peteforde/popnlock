@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require 'socket'
 require 'osax'
 include OSAX
 
@@ -25,17 +26,23 @@ frames = osax.display_dialog("How many frames?", :default_answer => "8")[:text_r
 
 start = images[-frames][14,4]
 
-`ffmpeg -loop 1 -t #{(1/framerate.to_f) * frames * loops} -framerate #{framerate} -start_number #{start} -i "#{path}#{project}_#{scene}_01_X1_%04d.tiff" #{output + Time.now.strftime("%Y%m%d%H%M%S")}.mp4`
+timestamp = Time.now.strftime("%Y%m%d%H%M%S")
 
-videos = Dir.entries(output)
-videos.delete_at(2)
-videos = videos.select { |f| File.file?(output + f)}
-videos = videos.sort_by { |f| File.mtime(output + f) }
-videos = videos.last(8)
-videos = videos.reverse
+`ffmpeg -loop 1 -t #{(1/framerate.to_f) * frames * loops} -framerate #{framerate} -start_number #{start} -i "#{path}#{project}_#{scene}_01_X1_%04d.tiff" #{output + timestamp}.mov`
 
-File.open(app + "playlist", "w") do |f|
-  videos.each { |element| f.puts(output + element) }
-end
+s = TCPSocket.new "localhost", 9002
+s.puts "#{output + timestamp}.mov"
+s.close
 
-`echo 'loadlist playlist 0' >> ~/popnlock/whip`
+# videos = Dir.entries(output)
+# videos.delete_at(2)
+# videos = videos.select { |f| File.file?(output + f)}
+# videos = videos.sort_by { |f| File.mtime(output + f) }
+# videos = videos.last(8)
+# videos = videos.reverse
+#
+# File.open(app + "playlist", "w") do |f|
+#   videos.each { |element| f.puts(output + element) }
+# end
+#
+# `echo 'loadlist playlist 0' >> ~/popnlock/whip`
