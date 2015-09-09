@@ -5,12 +5,11 @@ require 'osax'
 include OSAX
 
 app = ENV["HOME"] + "/popnlock/"
-data = ENV["HOME"] + "/popnlock-data/"
-output = ENV["HOME"] + "/Dropbox/Catshrine_Videos/"
-project = "XXX"
-framerate = 8
-loops = 4
-
+data = ENV["HOME"] + "/Dragonframe/"
+output = ENV["HOME"] + "/popnlock-videos/"
+project = "TEST"
+framerate = 1
+loops = 1
 
 production = Dir.glob(data + "*.dgn").sort_by { |f| File.mtime(f) }[-1]
 
@@ -23,12 +22,10 @@ images = images.select { |f| File.file?(path + f)}
 images = images.sort_by { |f| File.mtime(path + f) }
 
 frames = osax.display_dialog("How many frames?", :default_answer => "8")[:text_returned].to_i
-
-start = images[-frames][14,4]
+start = images[-frames][11 + project.length, 4]
 
 timestamp = Time.now.strftime("%Y%m%d%H%M%S")
-
-`ffmpeg -loop 1 -t #{(1/framerate.to_f) * frames * loops} -framerate #{framerate} -start_number #{start} -i "#{path}#{project}_#{scene}_01_X1_%04d.tiff" #{output + timestamp}.mov`
+`ffmpeg -loop 1 -t #{(1/framerate.to_f) * frames * loops} -framerate #{framerate} -start_number #{start} -i "#{path}#{project}_#{scene}_01_X1_%04d.tiff" -vcodec mpeg4 -b:v 1200k -flags +aic+mv4 #{output + timestamp}.mov`
 
 s = TCPSocket.new "localhost", 9002
 s.puts "#{output + timestamp}.mov"
